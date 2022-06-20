@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema({
   }
 });
 
+// // encryption or hashing password
 userSchema.pre('save', async function(next) {
   // Only run this function if password was actually modified
   if (!this.isModified('password')) return next();
@@ -48,6 +49,17 @@ userSchema.pre('save', async function(next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+//  this is for matching password. explaination exist in khata
+// userSchema.methods.correctPassword = async function(
+//   candidatePassword
+//   // userPassword
+// ) {
+//   return await bcrypt.compare(candidatePassword, this.password);
+// };
+userSchema.methods.correctPassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
 const User = mongoose.model('User', userSchema);
 
