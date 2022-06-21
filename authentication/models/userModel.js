@@ -33,7 +33,8 @@ const userSchema = new mongoose.Schema({
       },
       message: 'Passwrods are not the same!'
     }
-  }
+  },
+  passwordChangedAt: Date
 });
 
 // // encryption or hashing password
@@ -50,15 +51,23 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
-//  this is for matching password. explaination exist in khata
-// userSchema.methods.correctPassword = async function(
-//   candidatePassword
-//   // userPassword
-// ) {
-//   return await bcrypt.compare(candidatePassword, this.password);
-// };
+///////
 userSchema.methods.correctPassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+
+    return JWTTimestamp < changedTimestamp;
+  }
+
+  // False means NOT changed
+  return false;
 };
 
 const User = mongoose.model('User', userSchema);
