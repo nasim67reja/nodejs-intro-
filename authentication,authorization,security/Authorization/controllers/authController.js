@@ -119,8 +119,9 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     return next(new AppError('There is no user with email address', 404));
 
   // 2) Generate the random reset token
-  const resetToken = user.createPasswordResetToken();
+  const resetToken = user.createPasswordResetToken(); // we just update the document by calling this function. that's why we need to save the document in database
   await user.save({ validateBeforeSave: false });
+  // await user.save({ validateModifiedOnly: true }); // alternative way
 
   // 3) Send it to user's email
 
