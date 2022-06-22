@@ -59,6 +59,12 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
+userSchema.pre('save', function(next) {
+  if (!this.isModified('password') || this.isNew) return next(); // user password modified na korle ekhanei return mane next middlewate e chole jabe. aar modified korle porer line gula execute hbe
+
+  this.passwordChangedAt = Date.now() - 1000; // need to understand
+  next();
+});
 ///////
 userSchema.methods.correctPassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
@@ -87,7 +93,6 @@ userSchema.methods.createPasswordResetToken = function() {
     .digest('hex');
 
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-
   return resetToken;
 };
 

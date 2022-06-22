@@ -1,8 +1,10 @@
+const crypto = require('crypto');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/AppError');
+const sendEmail = require('./../utils/email');
 
 const signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -113,18 +115,82 @@ exports.restrictTo = (...roles) => {
 };
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-  // 1) Get user based on POSTed email
+  ////////// 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email }); // because user give the email not the id
   if (!user)
     return next(new AppError('There is no user with email address', 404));
 
-  // 2) Generate the random reset token
+  /////////// 2) Generate the random reset token
   const resetToken = user.createPasswordResetToken(); // we just update the document by calling this function. that's why we need to save the document in database
   await user.save({ validateBeforeSave: false });
   // await user.save({ validateModifiedOnly: true }); // alternative way
 
-  // 3) Send it to user's email
+  /////////// 3) Send it to user's email
+  const resetURL = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/users/resetPassword/${resetToken}`;
 
-  next();
+  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Your password reset token (valid for 10 min)',
+      message
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Token sent to email!'
+    });
+  } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return next(
+      new AppError('There was an error sending the email. Try again later!'),
+      500
+    );
+  }
 });
-exports.resetPassword = (req, res, next) => {};
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  // 1) Get user based on the token
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() } // ekhnae amra user khujtechi hashedtoken mile jay  and p.R.E time ekhn kar thkee beshi emon user khujtechi
+  });
+
+  //  2) If token has not expired , and there is user , set the new password
+  if (!user) return next(new AppError('Token is Invalid or has expired', 400));
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.password;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+
+  await user.save();
+  // 3) Update changePassword At property for the user
+
+  // 4) Log the user in, send JWT
+  const token = signToken(user._id);
+
+  res.status(200).json({
+    status: 'success',
+    token
+  });
+});
+
+// ///////////////////////// Forgot and reset Process ///////////////////
+
+// 1. The user hitting forgot password from the client and provided an email address (In the backend: We take the email address and find them in our database to know who forgot their password.)
+
+// 2. We create a reset token and send as a link to the user via email. This is because we assume that email is secure and unique to the user. We include the reset token because each reset token is unique, so that we are able to find out who actually forgot their password, and we can change the person's password to the new one.
+
+// 3. When the user clicks the link and enter new password, validation occured and finally set a new password for the user. In the meantime, added a field to indicate at what time the user ever changed his password. This is used later when user try to access a protected route using the old token, we can block their access.
