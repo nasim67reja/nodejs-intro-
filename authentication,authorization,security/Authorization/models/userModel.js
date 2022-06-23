@@ -42,7 +42,11 @@ const userSchema = new mongoose.Schema({
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
-  passwordResetExpires: Date
+  passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true
+  }
 });
 
 // // encryption or hashing password
@@ -63,6 +67,12 @@ userSchema.pre('save', function(next) {
   if (!this.isModified('password') || this.isNew) return next(); // user password modified na korle ekhanei return mane next middlewate e chole jabe. aar modified korle porer line gula execute hbe
 
   this.passwordChangedAt = Date.now() - 1000; // need to understand
+  next();
+});
+
+userSchema.pre(/^find/, function(next) {
+  // this points to the current query
+  this.find({ active: { $ne: false } });
   next();
 });
 ///////
