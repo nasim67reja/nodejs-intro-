@@ -8,14 +8,6 @@ const router = express.Router();
 
 // POST /tour/23fdj/reviews
 
-// router
-//   .route('/:tourId/reviews')
-//   .post(
-//     authController.protect,
-//     authController.restrictTo('user'),
-//     reviewController.createReview
-//   );
-
 router.use('/:tourId/reviews', reviewRouter);
 
 router
@@ -27,7 +19,8 @@ router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
 router
   .route('/')
-  .get(authController.protect, tourController.getAllTours)
+  // .get(authController.protect, tourController.getAllTours)
+  .get(tourController.getAllTours)
   .post(tourController.createTour);
 
 router
