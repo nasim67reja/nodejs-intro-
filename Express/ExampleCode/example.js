@@ -5,7 +5,7 @@ const app = express();
 
 // 1. middleware:
 
-app.use(morgan('dev'));
+app.use(morgan('dev')); // it will give information about request
 
 app.use(express.json());
 
