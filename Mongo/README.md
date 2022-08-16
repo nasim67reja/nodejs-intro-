@@ -57,3 +57,32 @@ and create this file to your application `.eslintrc.json`
 }
 
 ```
+
+## CRUD OPERATION
+
+### Creating
+
+- `const newProduct = await Product.create(req.body);` => It will create new Product
+
+### Reaading
+
+- `const products = await Product.find();` => It will return all the product
+
+### Updating
+
+```JavaScript
+
+const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+     new: true,
+     runValidators: true,
+   });
+
+```
+
+=> It will return all the product
+
+### Deleting
+
+- `await Product.findByIdAndDelete(req.params.id);` => This code is responsible for deleting a single product
+
+for more check [this](https://mongoosejs.com/docs/queries.html)
