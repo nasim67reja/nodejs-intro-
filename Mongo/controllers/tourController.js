@@ -203,6 +203,7 @@ exports.getMonthlyPlan = async (req, res) => {
 // const queryObj = { ...req.query };
 // const excludedFields = ['page', 'sort', 'limit', 'fields'];
 // excludedFields.forEach(el => delete queryObj[el]);
+// const { page, sort, limit, fields, ...queryObj } = req.query; // alternative to the delete
 
 // // 1(b) Advanced filtering
 // let queryStr = JSON.stringify(queryObj);
