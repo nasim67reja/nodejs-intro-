@@ -86,3 +86,8 @@ const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
 - `await Product.findByIdAndDelete(req.params.id);` => This code is responsible for deleting a single product
 
 for more check [this](https://mongoosejs.com/docs/queries.html)
+
+## Import & Delete Data
+
+- For Delete run this command in the console `node dev-data/data/import-dev-data.js --delete`
+- For Importing file on database run this command in the console `node dev-data/data/import-dev-data.js --import`
