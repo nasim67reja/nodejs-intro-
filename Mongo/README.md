@@ -91,3 +91,25 @@ for more check [this](https://mongoosejs.com/docs/queries.html)
 
 - For Delete run this command in the console `node dev-data/data/import-dev-data.js --delete`
 - For Importing file on database run this command in the console `node dev-data/data/import-dev-data.js --import`
+
+## Virtual Properties
+
+Virtual propertry is are basically fields that we can define on our schema but will not be persist in. they will not be saved in database in order to save some space in there.
+
+```JavaScript
+
+tourSchema.virtual('durationWeeks').get(function() {
+  return this.duration / 7;
+});
+
+```
+
+Now the data durationWeeks will found when we call all the tour.But the data will not exist in database that's why we can't run query for this data.
+NOTE : we have add this to the schema type option
+
+```JavaScript
+{
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
+```
