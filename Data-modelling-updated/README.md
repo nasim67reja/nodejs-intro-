@@ -237,3 +237,44 @@ reviewSchema.pre(/^find/, function(next) {
   next();
 });
 ```
+
+## Nested routes
+
+- explaination have in paper
+
+- put this code into `createReview` handler
+
+```js
+// Allow nested routes
+
+if (!req.body.tour) req.body.tour = req.params.tourId;
+if (!req.body.user) req.body.user = req.user.id;
+```
+
+**we will get req.user from protect middleware**
+
+- Basically we was trying to write tourid and userid manually when create a review.but this is not true in real world
+  application. basically the tour id comes from route and the user id comes from the currently logged in user.
+  that's why we need to specify the tour id into the route like these `//post /tour/:tourId/reviews`
+
+## Nested Routes with express
+
+- the problem here is that we use reviewController in tourRoutes file and write same code in two places.
+  for overcome this problem express gives us a solution like these
+  In tour routes
+
+```js
+const reviewRouter = require('./../routes/reviewRoutes');
+//then
+// router
+//   .route('/:tourId/reviews')
+//   .post(
+//     authController.protect,
+//     authController.restrictTo('user'),
+//     reviewController.createReview
+//   );
+
+router.use('/:tourId/reviews', reviewRouter);
+```
+
+- Then write `const router = express.Router({ mergeParams: true });` . this will solve our problem
