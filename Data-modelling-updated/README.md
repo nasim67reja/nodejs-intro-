@@ -278,3 +278,14 @@ router.use('/:tourId/reviews', reviewRouter);
 ```
 
 - Then write `const router = express.Router({ mergeParams: true });` . this will solve our problem
+
+## Adding a nested get endpoint
+
+- Add this to the `getAllReviews` handler funciton
+
+```js
+let filter = {};
+if (req.params.tourId) filter = { tour: req.params.tourId };
+
+const reviews = await Review.find(filter);
+```
