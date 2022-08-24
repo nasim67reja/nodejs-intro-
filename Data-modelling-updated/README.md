@@ -119,3 +119,121 @@ it's a two step process
 
 - first we create a reference to another model with these we effectively create relationship between two dataset
 - then in the second step we populate that field that we just specified before the 'guides' using the populate methods
+
+## lec-154 (Modelling Reviews:Parent Referencing)
+
+```js
+const mongoose = require('mongoose');
+
+const reviewSchema = new mongoose.Schema(
+  {
+    review: {
+      type: String,
+      required: [true, 'Review can not be empty']
+    },
+    rating: {
+      type: Number,
+      min: 1,
+      max: 5
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    tour: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Tour',
+      required: [true, 'Review must belong to a tour']
+    },
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: [true, 'Review must belong to a user']
+    }
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
+);
+
+const Review = mongoose.model('Review', reviewSchema);
+
+module.exports = Review;
+```
+
+## Creating and Getting Reviews
+
+- Implement all the `reviewRoutes`, `reviewController` create a review in postman like this
+
+```js
+{
+    "review":"Great Product ",
+    "rating":4.5,
+    "product":"62fc9f67fbb202a6698846a5",
+    "user":"6302f4dd9cd0e816d2dc8673"
+}
+```
+
+## Lec-156 (Poplating Reviews)
+
+- took this into reviewModel file
+
+```js
+//  QUERY MIDDLEWATE
+reviewSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: 'user',
+    select: 'name'
+  }).populate({
+    path: 'product',
+    select: 'name summary'
+  });
+
+  // this.populate({
+  //   path: 'user',
+  //   select: 'name '
+  // });
+  next();
+});
+```
+
+## Lec-157 (Virtual Populate:Tours and Reviews)
+
+- explaination had in paper
+
+```js
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id'
+});
+```
+
+- so the schema will done but virtually not like before and now the only work is remain to do
+- and this is `populate` . but now we don't use middleware for all the query start with find. beacuse user don't need to all the reivew
+  in all the tour.
+- so just use this populate in single tour in this case `getTour` controller.
+
+`const tour = await Tour.findById(req.params.id).populate('reviews');`
+
+- for closing the chain off the populate for tour in review.
+  i mean
+
+```js
+reviewSchema.pre(/^find/, function(next) {
+  // this.populate({
+  //   path: 'user',
+  //   select: 'name'
+  // }).populate({
+  //   path: 'tour',
+  //   select: 'name summary'
+  // });
+
+  this.populate({
+    path: 'user',
+    select: 'name '
+  });
+  next();
+});
+```
