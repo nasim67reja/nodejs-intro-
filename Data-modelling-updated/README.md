@@ -73,7 +73,7 @@ guides: [
 
 **note that we actually even don't need the Usermodel here for referencing**
 
-- in the next lecture we will get the user data by a process call **Ppulating**
+- in the next lecture we will get the user data by a process call **Populating**
 
 ## Populating Tour Guides
 
@@ -95,3 +95,27 @@ const tour = await Tour.findById(req.params.id).populate({
 ```
 
 **Behind the scenes populate makes new query so don't use it in many places blindly ofcourse in large application**
+
+- so now if we populate the tour guide in the getall the tour route then we have to copy this thing and paste in there
+  But we can use middleware again here.
+
+```js
+// Populating tour guide
+tourSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: 'guides',
+    // select: '-__v -passwordChangedAt -passwordResetExpires -passwordResetToken'
+    select: 'name email'
+  });
+  next();
+});
+```
+
+- so now it will works with all the operation which will start with find like update,patch and delete
+
+### let's recape
+
+it's a two step process
+
+- first we create a reference to another model with these we effectively create relationship between two dataset
+- then in the second step we populate that field that we just specified before the 'guides' using the populate methods

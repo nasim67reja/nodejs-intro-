@@ -159,6 +159,16 @@ tourSchema.pre(/^find/, function(next) {
   next();
 });
 
+// Populating tour guide
+tourSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: 'guides',
+    // select: '-__v -passwordChangedAt -passwordResetExpires -passwordResetToken'
+    select: 'name email'
+  });
+  next();
+});
+
 tourSchema.post(/^find/, function(docs, next) {
   // eslint-disable-next-line no-console
   console.log(`Query took ${Date.now() - this.start} milliseconds!`);
