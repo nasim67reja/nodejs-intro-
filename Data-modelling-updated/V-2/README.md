@@ -301,3 +301,67 @@ tourSchema.index({ slug: 1 });
 ```
 
 **Don't ignore index. because it's really benefitial for large application**
+
+## Calculating Average rating on Tours
+
+- import `const Tour = require('./tourModel');` file on reviewModel
+
+- then write these. for understanding check the video
+
+```js
+// static method for rating
+reviewSchema.statics.calcAverageRatings = async function(tourId) {
+  const stats = await this.aggregate([
+    {
+      $match: { tour: tourId }
+    },
+    {
+      $group: {
+        _id: '$tour',
+        nRating: { $sum: 1 },
+        avgRating: { $avg: '$rating' }
+      }
+    }
+  ]);
+
+  if (stats.length > 0) {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: stats[0].nRating,
+      ratingsAverage: stats[0].avgRating
+    });
+  } else {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: 0,
+      ratingsAverage: 4.5
+    });
+  }
+};
+
+reviewSchema.post('save', function() {
+  // this points to current review
+  this.constructor.calcAverageRatings(this.tour);
+});
+
+// findByIdAndUpdate
+// findByIdAndDelete
+reviewSchema.pre(/^findOneAnd/, async function(next) {
+  this.r = await this.findOne();
+  // console.log(this.r);
+  next();
+});
+
+reviewSchema.post(/^findOneAnd/, async function() {
+  // await this.findOne(); does NOT work here, query has already executed
+  await this.r.constructor.calcAverageRatings(this.r.tour);
+});
+```
+
+## Lec-170 (Preventing Duplicate review)
+
+`reviewSchema.index({ tour: 1, user: 1 }, { unique: true });` put this code in the `reviewSchema` file
+
+**Jonas index is not work becasue** -I had a look into why the unique indexing is not working for the Reviews, the reason is that you probably
+already have duplicate Reviews in your database and so mongoDB fails to add the unique option to the index. What you need to do is to delete the
+recent made reviews and then run the code.
+
+- `set: val => Math.round(val * 10) / 10` it will round the value of ratingAverage
