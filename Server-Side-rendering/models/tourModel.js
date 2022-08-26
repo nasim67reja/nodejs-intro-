@@ -176,7 +176,7 @@ tourSchema.pre(/^find/, function(next) {
   this.populate({
     path: 'guides',
     // select: '-__v -passwordChangedAt -passwordResetExpires -passwordResetToken'
-    select: 'name email'
+    select: 'name email photo'
   });
   next();
 });
