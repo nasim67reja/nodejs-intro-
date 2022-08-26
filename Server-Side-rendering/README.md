@@ -77,3 +77,8 @@ app.get('/', (req, res) => {
   `title Natour #{tour`}
 
   These are the fundamentals of pug
+
+  ## Lec 180 (Extending Our base Template with Blocks)
+
+- see the lecture for better understanding
+  _Note that: 13m from lecture 183 check this video_
