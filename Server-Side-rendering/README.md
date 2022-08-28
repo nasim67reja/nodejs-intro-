@@ -82,3 +82,31 @@ app.get('/', (req, res) => {
 
 - see the lecture for better understanding
   _Note that: 13m from lecture 183 check this video_
+
+## Lecture 189:(Logging in Users with Our API)
+
+- At first install this package `npm i cookie-parser`
+  Basically this will then parse all the cookies from incoming request
+
+- import the `const cookieParser=require('const cookieParser = require('cookie-parser'))`
+- and now then use it close to the body parser
+  `app.use(cookieParser());`
+
+  - Now let's go to the `authController` file. here we only read the token only form header authorization tab
+    but now we will read this from the cookie
+
+  - Inside the protect handler put this code
+
+    ```js
+    let token;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
+      token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies.jwt) {
+      token = req.cookies.jwt;
+    }
+    ```
+
+- now let's implement it by protecting some route. so go to the viewRoutes file
