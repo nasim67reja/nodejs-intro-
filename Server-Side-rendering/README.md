@@ -110,3 +110,64 @@ app.get('/', (req, res) => {
     ```
 
 - now let's implement it by protecting some route. so go to the viewRoutes file
+
+## Authentication by storing jwt in cookies
+
+### backend side
+
+```js
+app.use(
+  cors({
+    origin: ['http://localhost:3000'],
+    credentials: true
+  })
+);
+
+app.use(cookieParser());
+```
+
+authController
+
+```js
+res
+  .cookie('jwt', token, {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+    secure: true, // for development i mean https
+    sameSite: 'none'
+  })
+  .status(statusCode)
+  .json({
+    status: 'success',
+    token,
+    data: {
+      user
+    }
+  });
+```
+
+### Frontend :
+
+- `axios.defaults.withCredentials = true;` use this in the top of your react file. app.js for example
+
+- Now post any data by from
+
+```js
+const axiosPostCall = async () => {
+  try {
+    const { data } = await axios.post(
+      'http://127.0.0.1:8000/api/v1/users/login',
+      {
+        email: enteredEmail,
+        password: enteredPassword
+      }
+    );
+    if (data.status === 'success') navigate('/');
+  } catch (error) {
+    // console.log(`error: `, error);
+    setError(error.response.data.message);
+  }
+};
+```

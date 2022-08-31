@@ -2,26 +2,44 @@
 import axios from 'axios';
 import { showAlert } from './alerts';
 
+axios.defaults.withCredentials = true;
+
 export const login = async (email, password) => {
+  // try {
+  //   const res = await axios({
+  //     method: 'POST',
+  //     url: 'http://127.0.0.1:3000/api/v1/users/login',
+  //     data: {
+  //       email,
+  //       password
+  //     }
+  //   });
+
+  //   // if (res.data.status === 'success') {
+  //   //   showAlert('success', 'Logged in successfully!');
+  //   //   window.setTimeout(() => {
+  //   //     location.assign('/');
+  //   //   }, 1500);
+  //   // }
+  //   console.log(res);
+  // } catch (err) {
+  //   showAlert('error', err.response.data.message);
+  // }
+
   try {
-    const res = await axios({
-      method: 'POST',
-      url: 'http://127.0.0.1:3000/api/v1/users/login',
-      data: {
+    const { data } = await axios.post(
+      'http://127.0.0.1:3000/api/v1/users/login',
+      {
         email,
         password
       }
-    });
-
-    // if (res.data.status === 'success') {
-    //   showAlert('success', 'Logged in successfully!');
-    //   window.setTimeout(() => {
-    //     location.assign('/');
-    //   }, 1500);
-    // }
-    console.log(res);
-  } catch (err) {
-    showAlert('error', err.response.data.message);
+      // withCredentials: true,
+    );
+    // enter you logic when the fetch is successful
+    console.log(`data: `, data);
+  } catch (error) {
+    // enter your logic for when there is an error (ex. error toast)
+    console.log(`error: `, error);
   }
 };
 document.querySelector('.form').addEventListener('submit', e => {
