@@ -203,3 +203,19 @@ if (res.data.status === 'success') {
 ## Lecture 191
 
 - Install the parcel-bundler file for adding the js files `npm install --save-dev parcel`
+
+## Log Out
+
+- simply overwrite the cookie
+
+```js
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+  res.status(200).json({ status: 'success' });
+};
+```
+
+`if ((res.data.status = 'success')) location.reload(true);` it will then load a fresh page from server
