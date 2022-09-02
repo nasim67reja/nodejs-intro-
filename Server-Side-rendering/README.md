@@ -171,3 +171,35 @@ const axiosPostCall = async () => {
   }
 };
 ```
+
+## Reload the page automatically
+
+- The following is the syntax for reloading a page:
+  `window.location.reload();`
+
+* We can also allow a page refersh after a fixed time use the setTimeOut() method as seen below:
+
+```js
+setTimeout(() => {
+  document.location.reload();
+}, 3000);
+```
+
+## Jonas way
+
+```js
+if (res.data.status === 'success') {
+  showAlert('success', 'Logged in successfully!');
+  window.setTimeout(() => {
+    location.assign('/');
+  }, 1500);
+}
+```
+
+- so this code will responsible for basically, after log in succesfully showing an alert and after 1.5s navigate to the home page
+
+**Here showAlert is not default**
+
+## Lecture 191
+
+- Install the parcel-bundler file for adding the js files `npm install --save-dev parcel`
