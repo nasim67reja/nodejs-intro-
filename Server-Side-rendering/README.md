@@ -218,4 +218,22 @@ exports.logout = (req, res) => {
 };
 ```
 
+My Version
+
+```js
+exports.logout = (req, res) => {
+  res
+    .cookie('jwt', 'logout', {
+      expires: new Date(Date.now() + 10 * 1000),
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none'
+    })
+    .status(200)
+    .json({
+      status: 'success'
+    });
+};
+```
+
 `if ((res.data.status = 'success')) location.reload(true);` it will then load a fresh page from server
