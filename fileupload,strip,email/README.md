@@ -42,3 +42,133 @@ router.patch(
 SO we need to configure the multer
 
 ## lec:200 (Configure the Multer)
+
+First giving a better filename and second allowing only images files to be uploaded on to our server
+and to start let's actuallly move all the multer related stuff from this router to the controller
+
+put this stuffs from userRoutes to userController
+
+```js
+const multer = require('multer');
+
+const upload = multer({ dest: 'public/img/users' });
+
+exports.uploadUserPhoto = upload.single('photo');
+```
+
+and then create a router for this uploadUserPhoto handler
+
+```js
+router.patch(
+  '/updateMe',
+  authController.protect,
+  userController.uploadUserPhoto,
+  userController.updateMe
+);
+```
+
+- and now actually go ahead in configure or multer upload
+
+```js
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/img/users');
+  },
+  filename: (req, file, cb) => {
+    const ext = file.mimetype.split('/')[1];
+    cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+  }
+});
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) cb(null, true);
+  else cb(new AppError('Not an image! Please upload ony images.', 400), false);
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+});
+```
+
+- so all of our multer configrution now works really fine but of course there are one step
+  missing and that is actually link the user to the newly updated image because right now in the database
+  we obviously still have the path or actually the name of the old image because no one in our code we specified that
+  we want to update the user document itself
+
+So let's fixed that in the next video
+
+## Lec : 201 (Saving image name to database)
+
+`if (req.file) filteredBody.photo = req.file.filename;` put this line
+in updateMe controller
+it will help to update user photo
+
+- and write this in the userModel
+
+```js
+ photo: {
+    type: String,
+    default: 'default.jpg'
+  },
+```
+
+## Lec:202 (Resizing Images)
+
+- For resizing the image, we are going to use the sharp package `npm i sharp`
+
+In userController
+
+`const sharp = require('sharp');`
+
+```js
+// const multerStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, 'public/img/users');
+//   },
+//   filename: (req, file, cb) => {
+//     const ext = file.mimetype.split('/')[1];
+//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+//   }
+// });
+// if we need image processing then we need to go like this
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) cb(null, true);
+  else cb(new AppError('Not an image! Please upload ony images.', 400), false);
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+});
+
+exports.uploadUserPhoto = upload.single('photo');
+
+exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
+  if (!req.file) return next();
+
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+
+  await sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${req.file.filename}`);
+
+  next();
+});
+```
+
+Then in the userRoute file
+
+```js
+router.patch(
+  '/updateMe',
+  authController.protect,
+  userController.uploadUserPhoto,
+  userController.resizeUserPhoto,
+  userController.updateMe
+);
+```
