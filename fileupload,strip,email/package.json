@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon server.js",
-    "start:prod": "NODE_ENV=production nodemon server.js",
+    "start:prod": "set NODE_ENV=production&&nodemon server.js",
     "debug": "ndb server.js"
   },
   "author": "Jonas Schmedtmann",
@@ -31,6 +31,7 @@
     "pug": "^3.0.2",
     "sharp": "^0.31.0",
     "slugify": "^1.6.5",
+    "stripe": "^11.1.0",
     "validator": "^13.7.0",
     "xss-clean": "^0.1.1"
   },

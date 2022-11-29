@@ -313,3 +313,10 @@ and then took this into authController > signup
 const url = `${req.protocol}://${req.get('host')}/me`;
 await new Email(newUser, url).sendWelcome();
 ```
+
+## Setiing env by using terminal
+
+Run this command `DATABASE=mongodb+srv://admin:<PASSWORD>@tourcluster.jyhtvq9.mongodb.net/?retryWrites=true"&"w=majority`
+_note that "&"_
+
+data upload `node dev-data/data/import-dev-data.js --import`
